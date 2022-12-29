@@ -10,7 +10,7 @@ if not sql.TableExists( "utime" ) then
 end
 
 function onJoin( ply )
-	local uid = ply:UniqueID()
+	local uid = ply:SteamID()
 	local row = sql.QueryRow( "SELECT totaltime, lastvisit FROM utime WHERE player = " .. uid .. ";" )
 	local time = 0 
 
@@ -32,7 +32,7 @@ end
 hook.Add( "PlayerInitialSpawn", "UTimeInitialSpawn", onJoin )
 
 function updatePlayer( ply )
-	sql.Query( "UPDATE utime SET totaltime = " .. math.floor( ply:GetUTimeTotalTime() ) .. " WHERE player = " .. ply:UniqueID() .. ";" )
+	sql.Query( "UPDATE utime SET totaltime = " .. math.floor( ply:GetUTimeTotalTime() ) .. " WHERE player = " .. ply:SteamID() .. ";" )
 end
 hook.Add( "PlayerDisconnected", "UTimeDisconnect", updatePlayer )
 
