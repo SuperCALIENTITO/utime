@@ -1,48 +1,91 @@
 -- Written by Team Ulysses, http://ulyssesmod.net/
-module( "Utime", package.seeall )
+
+utime = utime or {}
+-- module( "Utime", package.seeall )
 if not SERVER then return end
 
-utime_welcome = CreateConVar( "utime_welcome", "1", FCVAR_ARCHIVE )
+local q = sql.Query
+local qR = sql.QueryRow
+local qV = sql.QueryValue
+utime.welcome = CreateConVar( "utime_welcome", "1", FCVAR_ARCHIVE )
+
+
+
+--[[------------------------------------------------
+		Database Creation and Update
+------------------------------------------------]]--
 
 if not sql.TableExists( "utime" ) then
-	sql.Query( "CREATE TABLE IF NOT EXISTS utime ( id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, player INTEGER NOT NULL, totaltime INTEGER NOT NULL, lastvisit INTEGER NOT NULL );" )
-	sql.Query( "CREATE INDEX IDX_UTIME_PLAYER ON utime ( player DESC );" )
+	q( "CREATE TABLE IF NOT EXISTS utime ( id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, player INTEGER NOT NULL, totaltime INTEGER NOT NULL, lastvisit INTEGER NOT NULL );" )
+	q( "CREATE INDEX IDX_UTIME_PLAYER ON utime ( player DESC );" )
 end
 
-function onJoin( ply )
-	local uid = ply:SteamID()
-	local row = sql.QueryRow( "SELECT totaltime, lastvisit FROM utime WHERE player = " .. uid .. ";" )
-	local time = 0 
+if q("SELECT * FROM utime.steamid") == false then
+	print( "SQL RESULT: ", q( "ALTER TABLE utime ADD steamid VARCHAR(64)" ) )
+end
 
-	if row then
-		if utime_welcome:GetBool() then
-			ULib.tsay( ply, "[UTime]Welcome back " .. ply:Nick() .. ", you last played on this server " .. os.date( "%c", row.lastvisit ) )
+
+
+local welcome = utime.welcome:GetBool()
+function utime.onJoin( ply )
+	local uid, steamid = ply:UniqueID(), ply:SteamID()
+	local row = qR( "SELECT totaltime, lastvisit FROM utime WHERE player = " .. uid )
+	local steamrow = qR( "SELECT totaltime, lastvisit FROM utime WHERE steamid = " .. steamid )
+	local time = 0
+
+
+	if steamrow then
+
+		if welcome then
+			ULib.tsay( ply, "[UTime] Bienvenido devuelta " .. ply:Nick() .. ", jugaste aqui la ultima vez el " .. os.date( "%c", steamrow.lastvisit ) )
 		end
-		sql.Query( "UPDATE utime SET lastvisit = " .. os.time() .. " WHERE player = " .. uid .. ";" )
+
+		q( "UPDATE utime SET lastvisit = " .. os.time() .. " WHERE steamid = \"" .. steamid .. "\"" )
+		time = steamrow.totaltime
+
+	elseif row then
+
+		if welcome then
+			ULib.tsay( ply, "[UTime] Bienvenido devuelta " .. ply:Nick() .. ", jugaste aqui la ultima vez el " .. os.date( "%c", row.lastvisit ) )
+		end
+
+		q( "UPDATE utime SET lastvisit = " .. os.time() .. " WHERE player = " .. uid )
+		q( "UPDATE utime SET steamid = \"" .. steamid .. "\" WHERE player = " .. uid )
 		time = row.totaltime
+
 	else
-		if utime_welcome:GetBool() then
-			ULib.tsay( ply, "[UTime]Welcome to our server " .. ply:Nick() .. "!" )
+
+		if welcome then
+			ULib.tsay( ply, "[UTime] Bienvenido a Mapping Latam " .. ply:Nick() .. "!" )
 		end
-		sql.Query( "INSERT into utime ( player, totaltime, lastvisit ) VALUES ( " .. uid .. ", 0, " .. os.time() .. " );" )
+
+		q( "INSERT into utime ( player, totaltime, lastvisit, steamid ) VALUES ( " .. uid .. ", 0, " .. os.time() .. ", \"" .. steamid .. "\" )" )
+
 	end
+
 	ply:SetUTime( time )
 	ply:SetUTimeStart( CurTime() )
 end
-hook.Add( "PlayerInitialSpawn", "UTimeInitialSpawn", onJoin )
 
-function updatePlayer( ply )
-	sql.Query( "UPDATE utime SET totaltime = " .. math.floor( ply:GetUTimeTotalTime() ) .. " WHERE player = " .. ply:SteamID() .. ";" )
+
+
+function utime.updatePlayer( ply )
+	q( "UPDATE utime SET totaltime = " .. math.floor( ply:GetUTimeTotalTime() ) .. " WHERE steamid = " .. ply:SteamID() .. ";" )
 end
-hook.Add( "PlayerDisconnected", "UTimeDisconnect", updatePlayer )
 
-function updateAll()
+
+
+function utime.updateAll()
 	local players = player.GetAll()
 
 	for _, ply in ipairs( players ) do
 		if ply and ply:IsConnected() then
-			updatePlayer( ply )
+			utime.updatePlayer( ply )
 		end
 	end
 end
-timer.Create( "UTimeTimer", 67, 0, updateAll )
+
+
+hook.Add( "PlayerInitialSpawn", "UTimeInitialSpawn", utime.onJoin )
+hook.Add( "PlayerDisconnected", "UTimeDisconnect", utime.updatePlayer )
+timer.Create( "UTimeTimer", 67, 0, utime.updateAll )

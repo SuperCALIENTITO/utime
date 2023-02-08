@@ -1,5 +1,7 @@
 -- Written by Team Ulysses, http://ulyssesmod.net/
-module( "Utime", package.seeall )
+
+utime = utime or {}
+-- module( "Utime", package.seeall )
 if not CLIENT then return end
 
 local gpanel
@@ -181,8 +183,8 @@ function PANEL:Think()
 		self:PerformLayout()
 	end
 
-	self.total:SetText( timeToStr( LocalPlayer():GetUTimeTotalTime() ) )
-	self.session:SetText( timeToStr( LocalPlayer():GetUTimeSessionTime() ) )
+	self.total:SetText( utime.timeToStr( LocalPlayer():GetUTimeTotalTime() ) )
+	self.session:SetText( utime.timeToStr( LocalPlayer():GetUTimeSessionTime() ) )
 end
 
 -----------------------------------------------------------
@@ -262,8 +264,8 @@ function INFOPANEL:Think()
 				return
 		end
 
-		self.total:SetText( timeToStr( ply:GetUTime() + CurTime() - ply:GetUTimeStart() ) )
-		self.session:SetText( timeToStr( CurTime() - ply:GetUTimeStart() ) )
+		self.total:SetText( utime.timeToStr( ply:GetUTime() + CurTime() - ply:GetUTimeStart() ) )
+		self.session:SetText( utime.timeToStr( CurTime() - ply:GetUTimeStart() ) )
 		self.nick:SetText( ply:Nick() )
 end
 

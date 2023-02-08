@@ -1,8 +1,7 @@
 -- Written by Team Ulysses, http://ulyssesmod.net/
-AddCSLuaFile( "autorun/sh_utime.lua" )
-AddCSLuaFile( "autorun/cl_utime.lua" )
 
-module( "Utime", package.seeall )
+utime = utime or {}
+-- module( "Utime", package.seeall )
 
 local meta = FindMetaTable( "Player" )
 if not meta then return end
@@ -31,7 +30,7 @@ function meta:GetUTimeTotalTime()
 	return self:GetUTime() + CurTime() - self:GetUTimeStart()
 end
 
-function timeToStr( time )
+function utime.timeToStr( time )
 	local tmp = time
 	local s = tmp % 60
 	tmp = math.floor( tmp / 60 )
