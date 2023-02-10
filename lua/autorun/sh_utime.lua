@@ -1,7 +1,8 @@
 -- Written by Team Ulysses, http://ulyssesmod.net/
 
 utime = utime or {}
--- module( "Utime", package.seeall )
+
+module( "Utime", package.seeall )
 
 local meta = FindMetaTable( "Player" )
 if not meta then return end

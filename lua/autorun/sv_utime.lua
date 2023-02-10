@@ -1,12 +1,12 @@
 -- Written by Team Ulysses, http://ulyssesmod.net/
-
-utime = utime or {}
--- module( "Utime", package.seeall )
+module( "Utime", package.seeall )
 if not SERVER then return end
 
 local q = sql.Query
 local qR = sql.QueryRow
 local qV = sql.QueryValue
+
+utime = utime or {}
 utime.welcome = CreateConVar( "utime_welcome", "1", FCVAR_ARCHIVE )
 
 
@@ -30,7 +30,7 @@ local welcome = utime.welcome:GetBool()
 function utime.onJoin( ply )
 	local uid, steamid = ply:UniqueID(), ply:SteamID()
 	local row = qR( "SELECT totaltime, lastvisit FROM utime WHERE player = " .. uid )
-	local steamrow = qR( "SELECT totaltime, lastvisit FROM utime WHERE steamid = " .. steamid )
+	local steamrow = qR( "SELECT totaltime, lastvisit FROM utime WHERE steamid = \"" .. steamid .. "\"")
 	local time = 0
 
 
@@ -70,7 +70,7 @@ end
 
 
 function utime.updatePlayer( ply )
-	q( "UPDATE utime SET totaltime = " .. math.floor( ply:GetUTimeTotalTime() ) .. " WHERE steamid = " .. ply:SteamID() .. ";" )
+	q( "UPDATE utime SET totaltime = " .. math.floor( ply:GetUTimeTotalTime() ) .. " WHERE steamid = \"" .. ply:SteamID() .. "\"" )
 end
 
 
