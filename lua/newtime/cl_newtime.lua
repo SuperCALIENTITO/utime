@@ -336,8 +336,8 @@ function INFOPANEL:Think()
     end
 
     -- New format
-    self["NewTime.TotalTime"]:SetText( NewTime.FormatTime( ply:GetPlayerSessionTimePlayed() ) )
-    self["NewTime.SessionTime"]:SetText( NewTime.FormatTime( ply:GetPlayerTotalTimePlayed() ) )
+    self["NewTime.TotalTime"]:SetText( NewTime.FormatTime( ply:GetPlayerTotalTimePlayed() ) )
+    self["NewTime.SessionTime"]:SetText( NewTime.FormatTime( ply:GetPlayerSessionTimePlayed() ) )
     self["NewTime.Nick"]:SetText( ply:Nick() )
 end
 

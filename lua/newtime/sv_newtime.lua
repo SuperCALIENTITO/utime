@@ -51,7 +51,7 @@ function NewTime.OnJoin(ply)
     end
 
     if ( AltTime ) and ( not Time ) then
-        sql.QueryF([[INSERT INTO newtime (steamid, time, lastjoin, firstjoin) VALUES ("%s", %s, %s, %s)]], Steamid, AltTime.totaltime, AltTime.lastvisit, os.time())
+        sql.QueryF([[INSERT INTO newtime (steamid, time, lastjoin, firstjoin) VALUES ("%s", %s, %s, %s)]], Steamid, AltTime.totaltime, os.time(), AltTime.lastvisit)
 
         ply:SetPlayerSessionTimePlayed(0)
         ply:SetPlayerTotalTimePlayed(AltTime.totaltime)
